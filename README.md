@@ -2,7 +2,7 @@
 
 <p align="center">This is a snake game made using C programming language and is run on your linux terminal.</p>
 
-![alt text](https://github.com/korvahannu/c_terminal_snake/blob/main/image.jpg?raw=true)
+![alt text](https://raw.githubusercontent.com/korvahannu/c_terminal_snake/main/image.png)
 
 **How to compile and use**
 1. Open terminal in the folder that has snake.c and terminalstyle.h
