@@ -11,5 +11,5 @@
 **Hannu Korvala**
 _29.10.2021 version 1_
 
-Big thanks to Alnitak for this code
+Big thanks to Alnitak for this code <br />
 https://stackoverflow.com/questions/448944/c-non-blocking-keyboard-input
