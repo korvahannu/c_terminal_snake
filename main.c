@@ -39,18 +39,23 @@ https://stackoverflow.com/questions/448944/c-non-blocking-keyboard-input
 #include "components/alnitak.h"				// Script by Alnitak that makes this game possible
 #include "components/menu.h"					// Contains menus, such as the welcome screen
 // *********
-
+enum Collider {
+	appleCollider,
+	snakeBodyCollider,
+	wallCollider,
+	nullCollider
+};
 // Prototypes
 void initialize(void);
 void update(void);
-void updateInput(void);
-int checkCollision(void);
+void handleInput(void);
 void draw(void);
+enum Collider getCollider(void);
 // *********
 
 Snake snake;
 Screen screen;
-int apple[2];
+Apple apple;
 
 int updateSpeed = 55000;	// Game speed, too fast may result in graphical glitches. Lower is faster
 
@@ -60,7 +65,7 @@ char keyDown = 's';
 char keyLeft = 'a';
 char keyRight = 'd';
 
-int apples = 0;
+int score = 0;
 bool dead = false;
 
 int main(void) {
@@ -93,10 +98,11 @@ void initialize(void) {
 	screen.positionY = 1;
 	screen.width = 40;
 	screen.height = 10;
+	apple.scoreFactor = 50;
 	
 	initializeSnake(&snake, &screen);
 	
-	randomizeApplePosition(&apple[0], &apple[1], &snake, &screen);
+	randomizeApplePosition(&apple, &snake, &screen);
 }
 
 // Game update function. Checks collision, moves snake etc.
@@ -105,26 +111,28 @@ void update(void) {
 	
 	saveSnakePreviousLocation(&snake);
 	
-	updateInput();
+	handleInput();
 
 	moveSnakeOnce(&snake);
+
+	enum Collider currentCollider = getCollider();
 	
-	if(checkCollision() == 1) // 1 => apple got
+	if(currentCollider == appleCollider)
 	{
 		restoreSnakePreviousLocation(&snake);
 		
 		// Make the apples position the new snakes head
 		int head = getSnakeHead(snake);
-		snake.location[head+1][0] = apple[0];
-		snake.location[head+1][1] = apple[1];
+		snake.location[head+1][0] = apple.positionX;
+		snake.location[head+1][1] = apple.positionY;
 		
 		printf("\a");
 		
-		apples++;
-		randomizeApplePosition(&apple[0], &apple[1], &snake, &screen);
+		score += apple.scoreFactor;
+		randomizeApplePosition(&apple, &snake, &screen);
 	}
 	
-	if(checkCollision() == 2 ||checkCollision() == 3)	// Player hit wall or snake itself
+	if(currentCollider == wallCollider ||currentCollider == snakeBodyCollider)	// Player hit wall or snake itself
 	{
 		dead = true;
 		
@@ -135,7 +143,7 @@ void update(void) {
 // Takes advantage of Alnitak's code. Checks if player has pressed any WASD key
 // Does not block, if no key is down the game will continue.
 // Chosen direction is stored in the direction -variable
-void updateInput() {
+void handleInput() {
 	set_conio_terminal_mode();
 	
 	if(kbhit())
@@ -192,7 +200,7 @@ void draw(void) {
 						}
 					}
 					
-					if(apple[0] == x && apple[1] == y)
+					if(apple.positionX == x && apple.positionY == y)
 					{
 						drawApple();
 					}
@@ -220,11 +228,7 @@ void draw(void) {
 	
 	int head = getSnakeHead(snake);
 	
-	terminalStyle(BACKGROUND_YELLOW);
-	terminalStyle(TEXT_GREY);
-	terminalStyle(TEXT_EFFECT_BOLD);
-	printf("Apples: %d . . . Snake length: %d", apples, head+1);
-	resetTerminalStyle();
+	drawScoreboard(score, head+1);
 	
 	if(dead)
 		printf("\nYikes! You died.");
@@ -234,14 +238,13 @@ void draw(void) {
 }
 
 // Checks if snake has collided with anything
-// Return: 0 means no collision, 1 means collision with apple, 2 means collision with a wall, 3 means collision with snakes body
-int checkCollision(void) {
+enum Collider getCollider(void) {
 	
 	int head = getSnakeHead(snake);
 	
-	if(apple[0] == snake.location[head][0] && apple[1] == snake.location[head][1])
+	if(apple.positionX == snake.location[head][0] && apple.positionY == snake.location[head][1])
 	{
-		return 1;
+		return appleCollider;
 	}
 	
 	if(snake.location[head][0] < screen.positionX
@@ -249,7 +252,7 @@ int checkCollision(void) {
 	||snake.location[head][1] < screen.positionY
 	||snake.location[head][1] > screen.positionY+screen.height-1)
 	{
-		return 2;
+		return wallCollider;
 	}
 	
 	for(int i = 0; i < snake.maxLength; i++)
@@ -259,9 +262,9 @@ int checkCollision(void) {
 		
 		if(snake.location[head][0] == snake.location[i][0] && snake.location[head][1] == snake.location[i][1])
 		{
-			return 3;
+			return snakeBodyCollider;
 		}
 	}
 	
-	return 0;
+	return nullCollider;
 }

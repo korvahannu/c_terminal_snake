@@ -1,20 +1,25 @@
-// Randomizes apple position, duh!
-void randomizeApplePosition(int * appleX, int * appleY, Snake * snake, Screen * screen) {
+typedef struct {
+	int positionX;
+	int positionY;
+	int scoreFactor;
+} Apple;
+
+void randomizeApplePosition(Apple * apple, Snake * snake, Screen * screen) {
 	
 	bool acceptPosition = false;
 	
 	do
 	{
 		acceptPosition = true;
-		*appleX = (*screen).positionX + (rand()%(*screen).width);
-		*appleY = (*screen).positionY + (rand()%(*screen).height);
+		(*apple).positionX = (*screen).positionX + (rand()%(*screen).width);
+		(*apple).positionY = (*screen).positionY + (rand()%(*screen).height);
 		
 		for(int i = 0; i < (*snake).maxLength; i++)
 		{
 			if((*snake).location[i][0]==-1)
 				break;
 			
-			if(*appleX == (*snake).location[i][0] && *appleY == (*snake).location[i][1])
+			if((*apple).positionX  == (*snake).location[i][0] && (*apple).positionY == (*snake).location[i][1])
 				acceptPosition = false;
 		}
 	}

@@ -6,7 +6,7 @@ char snakeChar = ' ';
 char * wallStyle = BACKGROUND_RED;
 char wallChar = ' ';
 
-char * backgroundStyle = BACKGROUND_GREY;
+char * backgroundStyle = "DVC_DEFAULT";
 char backgroundChar = ' ';
 
 char * appleStyle = BACKGROUND_GREEN;
@@ -36,4 +36,10 @@ void drawApple(void) {
 	putchar(appleChar);
 	resetTerminalStyle();
 }
-// end of draw(something) functions
+
+void drawScoreboard(int score, int snakeLength) {
+	terminalStyle(TEXT_GREY);
+	terminalStyle(TEXT_EFFECT_BOLD);
+	printf("Score: %d", score);
+	resetTerminalStyle();
+}
